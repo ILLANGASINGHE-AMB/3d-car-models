@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import Scene from './components/Scene'
 
 const COLOR_PALETTE = [
-  { name: 'Carbon Black', hex: '#16171d' },
+  { name: 'Liquid Silver', hex: '#cbd5e1' },
   { name: 'Teal Neon', hex: '#00e5ff' },
   { name: 'Sunset Orange', hex: '#ff5722' },
   { name: 'Acid Green', hex: '#39ff14' },
   { name: 'Hyper Purple', hex: '#bd00ff' },
   { name: 'Formula Red', hex: '#e63946' },
-  { name: 'Liquid Silver', hex: '#cbd5e1' },
+  { name: 'Carbon Black', hex: '#16171d' },
 ];
 
 const PRESETS = {
@@ -65,137 +65,136 @@ const PRESETS = {
 export default function App() {
   const [activePreset, setActivePreset] = useState('sedan');
   const [specs, setSpecs] = useState(PRESETS.sedan);
-  const [colorIndex, setColorIndex] = useState(1); // Default to Teal Neon
+  const [colorIndex, setColorIndex] = useState(0); // Default to Liquid Silver
   const [cameraAngle, setCameraAngle] = useState(Math.PI / 4); // Yaw rotation angle
   const [cameraPitch, setCameraPitch] = useState(Math.PI / 6); // Pitch rotation angle
   const [cameraDistance, setCameraDistance] = useState(7);
   const [toast, setToast] = useState('');
   const [toastId, setToastId] = useState(null);
 
-  // Trigger brief alert text in HUD when key actions happen
+  // Trigger brief alert text in HUD when actions happen
   const showToast = (message) => {
     setToast(message);
     if (toastId) clearTimeout(toastId);
-    const id = setTimeout(() => setToast(''), 1500);
+    const id = setTimeout(() => setToast(''), 1800);
     setToastId(id);
-  };
-
-  // Helper to safely step numerical values
-  const adjustSpec = (key, delta, min, max, name) => {
-    setSpecs(prev => {
-      const newVal = Math.min(max, Math.max(min, Number((prev[key] + delta).toFixed(2))));
-      if (newVal !== prev[key]) {
-        showToast(`${name}: ${newVal.toFixed(2)}m`);
-      }
-      return { ...prev, [key]: newVal };
-    });
   };
 
   // Preset changer
   const applyPreset = (key) => {
     setActivePreset(key);
     setSpecs(PRESETS[key]);
-    showToast(`Loaded Preset: ${PRESETS[key].name}`);
+    showToast(`Preset: ${PRESETS[key].name}`);
   };
 
-  // Handle global keyboard inputs
+  // Slider change helper
+  const handleSliderChange = (key, val) => {
+    setSpecs(prev => ({
+      ...prev,
+      [key]: Number(Number(val).toFixed(2))
+    }));
+  };
+
+  // Actions
+  const randomizeModel = () => {
+    setSpecs({
+      chassisLength: Number((2.0 + Math.random() * 3.0).toFixed(2)),
+      chassisWidth: Number((1.2 + Math.random() * 1.3).toFixed(2)),
+      chassisHeight: Number((0.2 + Math.random() * 0.8).toFixed(2)),
+      cabinLength: Number((1.0 + Math.random() * 2.0).toFixed(2)),
+      cabinWidth: Number((1.0 + Math.random() * 1.0).toFixed(2)),
+      cabinHeight: Number((0.4 + Math.random() * 1.1).toFixed(2)),
+      cabinOffset: Number((-0.8 + Math.random() * 1.4).toFixed(2)),
+      wheelRadius: Number((0.3 + Math.random() * 0.5).toFixed(2)),
+      wheelWidth: Number((0.15 + Math.random() * 0.23).toFixed(2)),
+    });
+    showToast("Model Specs Randomized");
+  };
+
+  const resetModel = () => {
+    setSpecs(PRESETS[activePreset]);
+    showToast("Reset to default specs");
+  };
+
+  const saveModel = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ preset: activePreset, color: COLOR_PALETTE[colorIndex].name, specs }, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `3d_vehicle_${activePreset}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast("Vehicle JSON Exported");
+  };
+
+  const cycleColor = () => {
+    setColorIndex(prev => {
+      const nextIdx = (prev + 1) % COLOR_PALETTE.length;
+      showToast(`Paint: ${COLOR_PALETTE[nextIdx].name}`);
+      return nextIdx;
+    });
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      showToast("Fullscreen Enabled");
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        showToast("Fullscreen Disabled");
+      }
+    }
+  };
+
+  // Keyboard controls listener (continues keyboard workflow seamlessly)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Prevent browser default scroll for arrows and space
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', '+', '-'].includes(e.key)) {
         e.preventDefault();
       }
 
+      // Safe step modifier helper
+      const stepSpec = (key, delta, min, max, name) => {
+        setSpecs(prev => {
+          const newVal = Math.min(max, Math.max(min, Number((prev[key] + delta).toFixed(2))));
+          if (newVal !== prev[key]) {
+            showToast(`${name}: ${newVal.toFixed(2)}m`);
+          }
+          return { ...prev, [key]: newVal };
+        });
+      };
+
       switch (e.key) {
-        // Preset selectors
         case '1': applyPreset('sedan'); break;
         case '2': applyPreset('suv'); break;
         case '3': applyPreset('truck'); break;
         case '4': applyPreset('sports'); break;
 
-        // Color cycling
         case 'c':
         case 'C':
-          setColorIndex(prev => {
-            const nextIdx = (prev + 1) % COLOR_PALETTE.length;
-            showToast(`Paint Color: ${COLOR_PALETTE[nextIdx].name}`);
-            return nextIdx;
-          });
+          cycleColor();
           break;
 
-        // Chassis Length: L (Shift+L) / l
-        case 'L':
-          adjustSpec('chassisLength', 0.1, 2.0, 5.0, 'Chassis Length');
-          break;
-        case 'l':
-          adjustSpec('chassisLength', -0.1, 2.0, 5.0, 'Chassis Length');
-          break;
+        case 'L': stepSpec('chassisLength', 0.1, 2.0, 5.0, 'Chassis Length'); break;
+        case 'l': stepSpec('chassisLength', -0.1, 2.0, 5.0, 'Chassis Length'); break;
+        case 'W': stepSpec('chassisWidth', 0.05, 1.2, 2.5, 'Chassis Width'); break;
+        case 'w': stepSpec('chassisWidth', -0.05, 1.2, 2.5, 'Chassis Width'); break;
+        case 'H': stepSpec('chassisHeight', 0.05, 0.2, 1.0, 'Chassis Height'); break;
+        case 'h': stepSpec('chassisHeight', -0.05, 0.2, 1.0, 'Chassis Height'); break;
+        case 'K': stepSpec('cabinLength', 0.1, 1.0, 3.0, 'Cabin Length'); break;
+        case 'k': stepSpec('cabinLength', -0.1, 1.0, 3.0, 'Cabin Length'); break;
+        case 'U': stepSpec('cabinHeight', 0.05, 0.4, 1.5, 'Cabin Height'); break;
+        case 'u': stepSpec('cabinHeight', -0.05, 0.4, 1.5, 'Cabin Height'); break;
+        case 'R': stepSpec('wheelRadius', 0.02, 0.3, 0.8, 'Wheel Radius'); break;
+        case 'r': stepSpec('wheelRadius', -0.02, 0.3, 0.8, 'Wheel Radius'); break;
 
-        // Chassis Width: W (Shift+W) / w
-        case 'W':
-          adjustSpec('chassisWidth', 0.05, 1.2, 2.5, 'Chassis Width');
-          break;
-        case 'w':
-          adjustSpec('chassisWidth', -0.05, 1.2, 2.5, 'Chassis Width');
-          break;
-
-        // Chassis Height: H (Shift+H) / h
-        case 'H':
-          adjustSpec('chassisHeight', 0.05, 0.2, 1.0, 'Chassis Height');
-          break;
-        case 'h':
-          adjustSpec('chassisHeight', -0.05, 0.2, 1.0, 'Chassis Height');
-          break;
-
-        // Cabin Length: K (Shift+K) / k
-        case 'K':
-          adjustSpec('cabinLength', 0.1, 1.0, 3.0, 'Cabin Length');
-          break;
-        case 'k':
-          adjustSpec('cabinLength', -0.1, 1.0, 3.0, 'Cabin Length');
-          break;
-
-        // Cabin Height: U (Shift+U) / u
-        case 'U':
-          adjustSpec('cabinHeight', 0.05, 0.4, 1.5, 'Cabin Height');
-          break;
-        case 'u':
-          adjustSpec('cabinHeight', -0.05, 0.4, 1.5, 'Cabin Height');
-          break;
-
-        // Wheel Radius: R (Shift+R) / r
-        case 'R':
-          adjustSpec('wheelRadius', 0.02, 0.3, 0.8, 'Wheel Radius');
-          break;
-        case 'r':
-          adjustSpec('wheelRadius', -0.02, 0.3, 0.8, 'Wheel Radius');
-          break;
-
-        // Camera Orbit (Yaw)
-        case 'ArrowLeft':
-          setCameraAngle(prev => prev - 0.08);
-          break;
-        case 'ArrowRight':
-          setCameraAngle(prev => prev + 0.08);
-          break;
-
-        // Camera Orbit (Pitch)
-        case 'ArrowUp':
-          setCameraPitch(prev => Math.min(Math.PI / 2.2, Math.max(0.05, prev - 0.05)));
-          break;
-        case 'ArrowDown':
-          setCameraPitch(prev => Math.min(Math.PI / 2.2, Math.max(0.05, prev + 0.05)));
-          break;
-
-        // Camera Distance (Zoom)
-        case '+':
-        case '=':
-          setCameraDistance(prev => Math.max(3.5, prev - 0.25));
-          break;
-        case '-':
-        case '_':
-          setCameraDistance(prev => Math.min(12, prev + 0.25));
-          break;
+        case 'ArrowLeft': setCameraAngle(prev => prev - 0.08); break;
+        case 'ArrowRight': setCameraAngle(prev => prev + 0.08); break;
+        case 'ArrowUp': setCameraPitch(prev => Math.min(Math.PI / 2.2, Math.max(0.05, prev - 0.05))); break;
+        case 'ArrowDown': setCameraPitch(prev => Math.min(Math.PI / 2.2, Math.max(0.05, prev + 0.05))); break;
+        case '+': case '=': setCameraDistance(prev => Math.max(3.5, prev - 0.25)); break;
+        case '-': case '_': setCameraDistance(prev => Math.min(12, prev + 0.25)); break;
 
         default:
           break;
@@ -207,228 +206,211 @@ export default function App() {
   }, [specs, toastId]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="app-container">
       
-      {/* Unified Sidebar (Title, Presets, Specs, Keybinds) */}
-      <div className="hud-panel sidebar">
-        
-        {/* Header / Brand */}
-        <div className="hud-brand">
-          <h1 className="hud-title">3D Vehicle builder<br />by <span>HeLLL3D</span></h1>
-          <p className="hud-subtitle">Procedural Modeling Console</p>
+      {/* 1. PROFESSIONAL TOP HEADER BAR */}
+      <header className="app-header">
+        <div className="brand-group">
+          <h1 className="header-title">3D Vehicle builder by <span>HeLLL3D</span></h1>
         </div>
+        <div className="header-actions">
+          <button className="icon-btn tooltip" onClick={cycleColor} data-tooltip="Cycle Paint Color">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.34298 19.4844 5.58519 19.7266 5.67931 20.0242C5.77342 20.3218 5.71966 20.6756 5.61214 21.3831L5.53939 21.8604C5.47463 22.2852 5.06014 22.5644 4.63935 22.4633C4.30053 22.3819 4 22.0933 4 21.75V20.5H5.5C5.77614 20.5 6 20.2761 6 20V18.5C6 18.2239 5.77614 18 5.5 18H3.5C3.22386 18 3 17.7761 3 17.5V16C3 15.7239 3.22386 15.5 3.5 15.5H5C5.27614 15.5 5.5 15.2761 5.5 15V13.5C5.5 13.2239 5.27614 13 5 13H4C3.72386 13 3.5 12.7761 3.5 12.5V11C3.5 10.7239 3.72386 10.5 4 10.5H6.5C6.77614 10.5 7 10.2761 7 10V8.5C7 8.22386 6.77614 8 6.5 8H5.5C5.22386 8 5 7.77614 5 7.5V6C5 5.72386 5.22386 5.5 5.5 5.5H8.5C8.77614 5.5 9 5.27614 9 5V3.5C9 3.22386 8.77614 3 8.5 3H7.5C7.22386 3 7 2.77614 7 2.5V2.1C8.5 2.03 10.2 2 12 2C17.5 2 22 6.5 22 12C22 17.5 17.5 22 12 22Z"/></svg>
+          </button>
+          <button className="action-btn text-btn" onClick={resetModel}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset
+          </button>
+          <button className="action-btn primary-btn" onClick={saveModel}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+        </div>
+      </header>
 
-        {/* Base Templates */}
-        <div style={{ marginTop: 20 }}>
-          <h3>Base Templates</h3>
-          <div className="presets-grid">
+      <div className="main-content">
+        
+        {/* 2. DOCK-ALIGNED LEFT SIDEBAR */}
+        <aside className="app-sidebar">
+          
+          {/* Preset Segmented Tabs */}
+          <div className="tabs-container">
             {Object.keys(PRESETS).map(key => (
-              <div 
+              <button 
                 key={key} 
-                className={`preset-card ${activePreset === key ? 'active' : ''}`}
+                className={`tab-item ${activePreset === key ? 'active' : ''}`}
+                onClick={() => applyPreset(key)}
               >
                 {PRESETS[key].name}
-              </div>
+              </button>
             ))}
           </div>
-        </div>
 
-        {/* Specs Visualizer */}
-        <div style={{ marginTop: 20 }}>
-          <h3>Vehicle Specifications</h3>
-          
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Chassis Length</span>
-              <span className="spec-val">{specs.chassisLength.toFixed(2)}m</span>
+          {/* Specifications Group */}
+          <div className="sidebar-section">
+            <h3 className="section-title">Vehicle Specifications</h3>
+            
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Chassis Length</span>
+                <span className="spec-value-badge">{specs.chassisLength.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="2.0" 
+                max="5.0" 
+                step="0.05"
+                value={specs.chassisLength} 
+                onChange={(e) => handleSliderChange('chassisLength', e.target.value)} 
+              />
             </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.chassisLength - 2.0) / 3.0) * 100}%` }}
+
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Chassis Width</span>
+                <span className="spec-value-badge">{specs.chassisWidth.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="1.2" 
+                max="2.5" 
+                step="0.05"
+                value={specs.chassisWidth} 
+                onChange={(e) => handleSliderChange('chassisWidth', e.target.value)} 
+              />
+            </div>
+
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Chassis Height</span>
+                <span className="spec-value-badge">{specs.chassisHeight.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="0.2" 
+                max="1.0" 
+                step="0.02"
+                value={specs.chassisHeight} 
+                onChange={(e) => handleSliderChange('chassisHeight', e.target.value)} 
+              />
+            </div>
+
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Cabin Length</span>
+                <span className="spec-value-badge">{specs.cabinLength.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="1.0" 
+                max="3.0" 
+                step="0.05"
+                value={specs.cabinLength} 
+                onChange={(e) => handleSliderChange('cabinLength', e.target.value)} 
+              />
+            </div>
+
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Cabin Height</span>
+                <span className="spec-value-badge">{specs.cabinHeight.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="0.4" 
+                max="1.5" 
+                step="0.05"
+                value={specs.cabinHeight} 
+                onChange={(e) => handleSliderChange('cabinHeight', e.target.value)} 
+              />
+            </div>
+
+            <div className="spec-item">
+              <div className="spec-header">
+                <span className="spec-label">Wheel Radius</span>
+                <span className="spec-value-badge">{specs.wheelRadius.toFixed(2)} m</span>
+              </div>
+              <input 
+                type="range" 
+                min="0.3" 
+                max="0.8" 
+                step="0.02"
+                value={specs.wheelRadius} 
+                onChange={(e) => handleSliderChange('wheelRadius', e.target.value)} 
               />
             </div>
           </div>
 
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Chassis Width</span>
-              <span className="spec-val">{specs.chassisWidth.toFixed(2)}m</span>
+          {/* Action Cards Group */}
+          <div className="sidebar-section action-section" style={{ marginTop: 'auto' }}>
+            <h3 className="section-title">Actions</h3>
+            <div className="actions-grid">
+              <button className="card-action-btn" onClick={randomizeModel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V21H16"/><path d="M4 12V4H12"/><path d="M21 3H16V8"/><path d="M4 20h8"/><path d="M21 21L12 12"/><path d="M21 3L3 21"/></svg>
+                <span>Randomize</span>
+              </button>
+              <button className="card-action-btn" onClick={resetModel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>Reset</span>
+              </button>
+              <button className="card-action-btn" onClick={saveModel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save</span>
+              </button>
             </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.chassisWidth - 1.2) / 1.3) * 100}%` }}
-              />
+          </div>
+        </aside>
+
+        {/* 3. VIEWPORT CONTAINER (With floating HUD details) */}
+        <main className="viewport-area">
+          {/* Floating Orbit Instructions */}
+          <div className="viewport-hud-card floating-instructions">
+            <div className="instructions-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>
+            </div>
+            <div className="instructions-text">
+              <p>Drag to rotate</p>
+              <p>Scroll to zoom</p>
+              <p>Right click to pan</p>
+              <p className="kbd-note">Or use keyboard: arrow keys, +/- keys</p>
             </div>
           </div>
 
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Chassis Height</span>
-              <span className="spec-val">{specs.chassisHeight.toFixed(2)}m</span>
-            </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.chassisHeight - 0.2) / 0.8) * 100}%` }}
-              />
-            </div>
+          {/* Floating Bottom Toolbar */}
+          <div className="viewport-hud-card floating-bottom-toolbar">
+            <button className="toolbar-icon-btn active" title="Orbit Control Mode">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>
+            </button>
+            <button className="toolbar-icon-btn" title="Pan Control Mode">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v9"/><path d="M6 14v1a5 5 0 0 0 5 5h3a6 6 0 0 0 6-6V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/></svg>
+            </button>
+            <button className="toolbar-icon-btn" onClick={toggleFullscreen} title="Toggle Fullscreen">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            </button>
           </div>
 
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Cabin Length</span>
-              <span className="spec-val">{specs.cabinLength.toFixed(2)}m</span>
-            </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.cabinLength - 1.0) / 2.0) * 100}%` }}
-              />
-            </div>
+          {/* R3F Canvas */}
+          <div className="canvas-container-full">
+            <Scene 
+              specs={specs} 
+              color={COLOR_PALETTE[colorIndex].hex} 
+              preset={activePreset}
+              cameraAngle={cameraAngle}
+              cameraPitch={cameraPitch}
+              cameraDistance={cameraDistance}
+            />
           </div>
 
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Cabin Height</span>
-              <span className="spec-val">{specs.cabinHeight.toFixed(2)}m</span>
-            </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.cabinHeight - 0.4) / 1.1) * 100}%` }}
-              />
-            </div>
+          {/* Live paint color name indicator */}
+          <div className="paint-indicator">
+            <span>Paint: {COLOR_PALETTE[colorIndex].name}</span>
+            <div className="paint-dot" style={{ backgroundColor: COLOR_PALETTE[colorIndex].hex }} />
           </div>
-
-          <div className="spec-row">
-            <div className="spec-info">
-              <span className="spec-name">Wheel Radius</span>
-              <span className="spec-val">{specs.wheelRadius.toFixed(2)}m</span>
-            </div>
-            <div className="progress-container">
-              <div 
-                className="progress-bar" 
-                style={{ width: `${((specs.wheelRadius - 0.3) / 0.5) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Keyboard Control Matrix */}
-        <div style={{ marginTop: 25 }}>
-          <h3>Control Matrix</h3>
-          
-          <div className="key-item">
-            <span className="key-label">Chassis Length (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">L</kbd>
-              <kbd className="key-cap">l</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Chassis Width (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">W</kbd>
-              <kbd className="key-cap">w</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Chassis Height (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">H</kbd>
-              <kbd className="key-cap">h</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Cabin Length (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">K</kbd>
-              <kbd className="key-cap">k</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Cabin Height (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">U</kbd>
-              <kbd className="key-cap">u</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Wheel Size (inc/dec)</span>
-            <div className="key-group">
-              <kbd className="key-cap">R</kbd>
-              <kbd className="key-cap">r</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Cycle Paint Color</span>
-            <kbd className="key-cap">C</kbd>
-          </div>
-
-          <div className="key-item" style={{ marginTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
-            <span className="key-label">Base Presets</span>
-            <div className="key-group">
-              <kbd className="key-cap">1</kbd>
-              <kbd className="key-cap">2</kbd>
-              <kbd className="key-cap">3</kbd>
-              <kbd className="key-cap">4</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Orbit Camera</span>
-            <div className="key-group">
-              <kbd className="key-cap">←</kbd>
-              <kbd className="key-cap">→</kbd>
-              <kbd className="key-cap">↑</kbd>
-              <kbd className="key-cap">↓</kbd>
-            </div>
-          </div>
-
-          <div className="key-item">
-            <span className="key-label">Zoom In / Out</span>
-            <div className="key-group">
-              <kbd className="key-cap">+</kbd>
-              <kbd className="key-cap">-</kbd>
-            </div>
-          </div>
-        </div>
-
+        </main>
       </div>
 
-      {/* 3D Canvas Viewport */}
-      <div className="canvas-container">
-        <Scene 
-          specs={specs} 
-          color={COLOR_PALETTE[colorIndex].hex} 
-          preset={activePreset}
-          cameraAngle={cameraAngle}
-          cameraPitch={cameraPitch}
-          cameraDistance={cameraDistance}
-        />
-      </div>
-
-      {/* Toast HUD Overlay */}
+      {/* Toast Alert popup */}
       {toast && <div className="toast-msg">{toast}</div>}
-
-      {/* Footer Info */}
-      <div className="hud-footer">
-        <div className="footer-item">
-          <span className="status-dot"></span>
-          <span>Engine Status: Online</span>
-        </div>
-        <div>
-          <span>Model: {PRESETS[activePreset].name} | Paint: {COLOR_PALETTE[colorIndex].name}</span>
-        </div>
-      </div>
     </div>
   )
 }
