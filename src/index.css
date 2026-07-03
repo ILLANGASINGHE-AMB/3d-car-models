@@ -58,28 +58,48 @@ body, html, #root {
   box-shadow: 0 8px 32px 0 rgba(0, 229, 255, 0.1);
 }
 
-.hud-header {
-  position: absolute;
+.sidebar {
   top: 20px;
   left: 20px;
-  right: 20px;
+  bottom: 20px;
+  width: 360px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-  pointer-events: none;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.2);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.4);
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hud-brand {
+  border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+  padding-bottom: 15px;
 }
 
 .hud-title {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
   text-transform: uppercase;
   text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  line-height: 1.25;
 }
 
 .hud-title span {
@@ -87,29 +107,11 @@ body, html, #root {
 }
 
 .hud-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-top: 4px;
-}
-
-/* Left panel - Parameters */
-.left-panel {
-  top: 90px;
-  left: 20px;
-  width: 320px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-}
-
-/* Right panel - Keyboard controls & status */
-.right-panel {
-  top: 90px;
-  right: 20px;
-  width: 320px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
+  letter-spacing: 1.5px;
+  margin-top: 6px;
 }
 
 h3 {

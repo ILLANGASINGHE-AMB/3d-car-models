@@ -208,97 +208,18 @@ export default function App() {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* Header Info */}
-      <div className="hud-header">
-        <div>
-          <h1 className="hud-title">Antigravity 3D <span>Vehicle Builder</span></h1>
+      
+      {/* Unified Sidebar (Title, Presets, Specs, Keybinds) */}
+      <div className="hud-panel sidebar">
+        
+        {/* Header / Brand */}
+        <div className="hud-brand">
+          <h1 className="hud-title">3D Vehicle builder<br />by <span>HeLLL3D</span></h1>
           <p className="hud-subtitle">Procedural Modeling Console</p>
         </div>
-      </div>
 
-      {/* Left HUD Panel - Specs Visualizer */}
-      <div className="hud-panel left-panel">
-        <h3>Vehicle Specifications</h3>
-        
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Chassis Length</span>
-            <span className="spec-val">{specs.chassisLength.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.chassisLength - 2.0) / 3.0) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Chassis Width</span>
-            <span className="spec-val">{specs.chassisWidth.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.chassisWidth - 1.2) / 1.3) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Chassis Height</span>
-            <span className="spec-val">{specs.chassisHeight.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.chassisHeight - 0.2) / 0.8) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Cabin Length</span>
-            <span className="spec-val">{specs.cabinLength.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.cabinLength - 1.0) / 2.0) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Cabin Height</span>
-            <span className="spec-val">{specs.cabinHeight.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.cabinHeight - 0.4) / 1.1) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec-info">
-            <span className="spec-name">Wheel Radius</span>
-            <span className="spec-val">{specs.wheelRadius.toFixed(2)}m</span>
-          </div>
-          <div className="progress-container">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${((specs.wheelRadius - 0.3) / 0.5) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div style={{ marginTop: 25 }}>
+        {/* Base Templates */}
+        <div style={{ marginTop: 20 }}>
           <h3>Base Templates</h3>
           <div className="presets-grid">
             {Object.keys(PRESETS).map(key => (
@@ -311,92 +232,176 @@ export default function App() {
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Right HUD Panel - Keyboard Control Matrix */}
-      <div className="hud-panel right-panel">
-        <h3>Control Matrix</h3>
-        
-        <div className="key-item">
-          <span className="key-label">Chassis Length (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">L</kbd>
-            <kbd className="key-cap">l</kbd>
+        {/* Specs Visualizer */}
+        <div style={{ marginTop: 20 }}>
+          <h3>Vehicle Specifications</h3>
+          
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Chassis Length</span>
+              <span className="spec-val">{specs.chassisLength.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.chassisLength - 2.0) / 3.0) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Chassis Width</span>
+              <span className="spec-val">{specs.chassisWidth.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.chassisWidth - 1.2) / 1.3) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Chassis Height</span>
+              <span className="spec-val">{specs.chassisHeight.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.chassisHeight - 0.2) / 0.8) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Cabin Length</span>
+              <span className="spec-val">{specs.cabinLength.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.cabinLength - 1.0) / 2.0) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Cabin Height</span>
+              <span className="spec-val">{specs.cabinHeight.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.cabinHeight - 0.4) / 1.1) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="spec-row">
+            <div className="spec-info">
+              <span className="spec-name">Wheel Radius</span>
+              <span className="spec-val">{specs.wheelRadius.toFixed(2)}m</span>
+            </div>
+            <div className="progress-container">
+              <div 
+                className="progress-bar" 
+                style={{ width: `${((specs.wheelRadius - 0.3) / 0.5) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="key-item">
-          <span className="key-label">Chassis Width (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">W</kbd>
-            <kbd className="key-cap">w</kbd>
+        {/* Keyboard Control Matrix */}
+        <div style={{ marginTop: 25 }}>
+          <h3>Control Matrix</h3>
+          
+          <div className="key-item">
+            <span className="key-label">Chassis Length (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">L</kbd>
+              <kbd className="key-cap">l</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Chassis Width (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">W</kbd>
+              <kbd className="key-cap">w</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Chassis Height (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">H</kbd>
+              <kbd className="key-cap">h</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Cabin Length (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">K</kbd>
+              <kbd className="key-cap">k</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Cabin Height (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">U</kbd>
+              <kbd className="key-cap">u</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Wheel Size (inc/dec)</span>
+            <div className="key-group">
+              <kbd className="key-cap">R</kbd>
+              <kbd className="key-cap">r</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Cycle Paint Color</span>
+            <kbd className="key-cap">C</kbd>
+          </div>
+
+          <div className="key-item" style={{ marginTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
+            <span className="key-label">Base Presets</span>
+            <div className="key-group">
+              <kbd className="key-cap">1</kbd>
+              <kbd className="key-cap">2</kbd>
+              <kbd className="key-cap">3</kbd>
+              <kbd className="key-cap">4</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Orbit Camera</span>
+            <div className="key-group">
+              <kbd className="key-cap">←</kbd>
+              <kbd className="key-cap">→</kbd>
+              <kbd className="key-cap">↑</kbd>
+              <kbd className="key-cap">↓</kbd>
+            </div>
+          </div>
+
+          <div className="key-item">
+            <span className="key-label">Zoom In / Out</span>
+            <div className="key-group">
+              <kbd className="key-cap">+</kbd>
+              <kbd className="key-cap">-</kbd>
+            </div>
           </div>
         </div>
 
-        <div className="key-item">
-          <span className="key-label">Chassis Height (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">H</kbd>
-            <kbd className="key-cap">h</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Cabin Length (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">K</kbd>
-            <kbd className="key-cap">k</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Cabin Height (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">U</kbd>
-            <kbd className="key-cap">u</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Wheel Size (inc/dec)</span>
-          <div className="key-group">
-            <kbd className="key-cap">R</kbd>
-            <kbd className="key-cap">r</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Cycle Paint Color</span>
-          <kbd className="key-cap">C</kbd>
-        </div>
-
-        <div className="key-item" style={{ marginTop: 15, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
-          <span className="key-label">Base Presets</span>
-          <div className="key-group">
-            <kbd className="key-cap">1</kbd>
-            <kbd className="key-cap">2</kbd>
-            <kbd className="key-cap">3</kbd>
-            <kbd className="key-cap">4</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Orbit Camera</span>
-          <div className="key-group">
-            <kbd className="key-cap">←</kbd>
-            <kbd className="key-cap">→</kbd>
-            <kbd className="key-cap">↑</kbd>
-            <kbd className="key-cap">↓</kbd>
-          </div>
-        </div>
-
-        <div className="key-item">
-          <span className="key-label">Zoom In / Out</span>
-          <div className="key-group">
-            <kbd className="key-cap">+</kbd>
-            <kbd className="key-cap">-</kbd>
-          </div>
-        </div>
       </div>
 
       {/* 3D Canvas Viewport */}
