@@ -465,3 +465,244 @@ input[type="range"]::-webkit-slider-thumb:hover {
   85% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -8px); }
 }
+
+/* ========================================
+   4. MODEL IMPORTER STYLES
+   ======================================== */
+
+/* Dropzone Panel */
+.dropzone-panel {
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 2px dashed var(--border-slate);
+  border-radius: 12px;
+  padding: 40px 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+.dropzone-panel:hover {
+  border-color: var(--accent-blue);
+  background-color: rgba(59, 130, 246, 0.04);
+}
+
+.dropzone-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-slate);
+}
+
+.dropzone-inner svg {
+  color: var(--accent-blue);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.dropzone-panel:hover .dropzone-inner svg {
+  opacity: 1;
+}
+
+.dropzone-main-text {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-white);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropzone-sub-text {
+  font-size: 12px;
+  color: var(--text-slate);
+  line-height: 1.5;
+}
+
+/* Imported Model Inspector */
+.imported-inspector-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.model-info-card {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-slate);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.info-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--text-slate);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.info-value {
+  font-size: 12px;
+  color: var(--text-white);
+  font-weight: 700;
+  max-width: 160px;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Toggle Switch */
+.inspector-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-label {
+  font-size: 13px;
+  color: var(--text-slate-light);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-switch {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border-slate);
+  border-radius: 22px;
+  transition: all 0.25s ease;
+}
+
+.slider-switch:before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--text-slate);
+  border-radius: 50%;
+  transition: all 0.25s ease;
+}
+
+.toggle-switch input:checked + .slider-switch {
+  background-color: rgba(59, 130, 246, 0.3);
+  border-color: var(--accent-blue);
+}
+
+.toggle-switch input:checked + .slider-switch:before {
+  background-color: var(--accent-blue);
+  transform: translateX(18px);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+}
+
+/* Import Action Button */
+.import-action-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-slate);
+  background-color: var(--bg-dark);
+  color: var(--text-slate-light);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.import-action-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Disabled State */
+.disabled,
+button:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Drag Overlay (hidden by default, shown via CSS on drag) */
+.drag-overlay-message {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background-color: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+}
+
+.app-container.dragging .drag-overlay-message {
+  display: flex;
+}
+
+.overlay-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--accent-blue);
+}
+
+.overlay-box p {
+  font-family: var(--font-display);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-white);
+}
+

@@ -1,8 +1,9 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, ContactShadows } from '@react-three/drei'
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import * as THREE from 'three'
 import Vehicle from './Vehicle'
+import ImportedModel from './ImportedModel'
 
 // Smoothly interpolates the camera to the target coordinates calculated from the keyboard state
 function CameraController({ angle, pitch, distance }) {
@@ -29,7 +30,8 @@ export default function Scene({
   preset, 
   cameraAngle, 
   cameraPitch, 
-  cameraDistance 
+  cameraDistance,
+  importedScene,  // NEW: the parsed GLTF scene object (or null)
 }) {
   return (
     <Canvas
@@ -37,11 +39,15 @@ export default function Scene({
       camera={{ position: [5, 3, 5], fov: 45 }}
       gl={{ antialias: true, preserveDrawingBuffer: true }}
     >
-      <color attach="background" args={['#0a0b0d']} />
+      <color attach="background" args={['#0b0f19']} />
 
       <Suspense fallback={null}>
-        {/* Procedural Vehicle */}
-        <Vehicle specs={specs} color={color} preset={preset} />
+        {/* Render either the imported model or the procedural vehicle */}
+        {importedScene ? (
+          <ImportedModel scene={importedScene} />
+        ) : (
+          <Vehicle specs={specs} color={color} preset={preset} />
+        )}
 
         {/* Ambient & soft environment lighting */}
         <ambientLight intensity={0.4} />
@@ -58,7 +64,7 @@ export default function Scene({
         <directionalLight 
           position={[-5, 5, -5]} 
           intensity={0.5} 
-          color="#00e5ff"
+          color="#3b82f6"
         />
 
         {/* Premium city lighting backdrop */}
